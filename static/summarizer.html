@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Summarizer</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f5f5f5; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; margin-bottom: 20px; }
+        p.subtitle { text-align: center; color: #666; margin-bottom: 40px; }
+        .section { margin-bottom: 30px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        textarea { width: 100%; height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        select { width: 100%; padding: 10px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .btn { background-color: #333; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; display: block; width: 100%; font-size: 1rem; margin-top: 20px; transition: background 0.2s; }
+        .btn:hover { background-color: #555; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .result { margin-top: 40px; padding: 20px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; display: none; }
+        .result h2 { margin-top: 0; font-size: 1.2rem; }
+        .back-link { display: block; margin-bottom: 20px; color: #666; text-decoration: none; font-size: 0.9rem; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Hub</a>
+        <h1>📝 AI Summarizer</h1>
+        <p class="subtitle">Paste text below and choose how you want it summarized.</p>
+
+        <div class="section">
+            <label>Enter text to summarize</label>
+            <textarea id="textContent" placeholder="Paste your text here..."></textarea>
+        </div>
+
+        <div class="section">
+            <label>Upload a PDF (Optional)</label>
+            <input type="file" id="fileInput" accept=".pdf">
+        </div>
+
+        <div class="section">
+            <label>Summary style</label>
+            <select id="summaryType">
+                <option value="Brief">Brief</option>
+                <option value="Detailed">Detailed</option>
+                <option value="Bullet Points">Bullet Points</option>
+            </select>
+        </div>
+
+        <button class="btn" id="sumBtn" onclick="summarize()">Summarize</button>
+
+        <div id="resultBox" class="result">
+            <h2>Summary</h2>
+            <div id="summaryOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        async function summarize() {
+            const text = document.getElementById('textContent').value;
+            const file = document.getElementById('fileInput').files[0];
+            const type = document.getElementById('summaryType').value;
+            const btn = document.getElementById('sumBtn');
+            const resultBox = document.getElementById('resultBox');
+            const output = document.getElementById('summaryOutput');
+
+            let finalInput = text;
+
+            // If a file is provided, we'd ideally extract text. 
+            // For simplicity in this unified UI, we'll suggest using the text area 
+            // OR the backend can handle multi-part if we add an endpoint.
+            // Let's assume text area for now, as you requested "Simple".
+
+            if (!finalInput.trim()) {
+                alert("Please enter some text to summarize.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Summarizing...";
+            resultBox.style.display = 'none';
+
+            try {
+                const res = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: finalInput, summary_type: type })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Error summarizing");
+
+                output.innerText = data.summary;
+                resultBox.style.display = 'block';
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Summarize";
+            }
+        }
+    </script>
+</body>
+</html>

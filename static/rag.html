@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Application</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f5f5f5; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; margin-bottom: 40px; }
+        .box { background: white; padding: 25px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        h2 { margin-top: 0; font-size: 1.2rem; color: #333; }
+        p.desc { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
+        input[type="file"], input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-top: 5px; box-sizing: border-box; }
+        .btn { background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .result { background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-top: 20px; display: none; }
+        .back-link { display: block; margin-bottom: 20px; color: #666; text-decoration: none; font-size: 0.9rem; }
+        .source { font-size: 0.8rem; color: #888; margin-top: 10px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Hub</a>
+        <h1>📖 RAG — Ask Your Document</h1>
+
+        <div class="box">
+            <h2>1. Upload a Document</h2>
+            <p class="desc">Supports <strong>.pdf</strong> and <strong>.txt</strong> files.</p>
+            <input type="file" id="fileInput">
+            <button class="btn" id="uploadBtn" onclick="upload()">Upload</button>
+            <div id="uploadStatus"></div>
+        </div>
+
+        <div class="box">
+            <h2>2. Ask a Question</h2>
+            <input type="text" id="questionInput" placeholder="e.g. What is the main topic of this document?">
+            <button class="btn" id="askBtn" onclick="ask()">Ask</button>
+        </div>
+
+        <div id="resultBox" class="result">
+            <h2>Answer</h2>
+            <div id="answerText"></div>
+            <div id="sources" class="source"></div>
+        </div>
+    </div>
+
+    <script>
+        async function upload() {
+            const file = document.getElementById('fileInput').files[0];
+            const btn = document.getElementById('uploadBtn');
+            const status = document.getElementById('uploadStatus');
+            if (!file) return alert("Select a file first.");
+
+            btn.disabled = true;
+            status.innerText = "Indexing...";
+
+            const fd = new FormData();
+            fd.append('file', file);
+
+            try {
+                const res = await fetch('/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+                status.innerText = data.message;
+            } catch (e) {
+                alert("Upload failed");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function ask() {
+            const question = document.getElementById('questionInput').value;
+            const btn = document.getElementById('askBtn');
+            const resultBox = document.getElementById('resultBox');
+            const answerText = document.getElementById('answerText');
+            if (!question.trim()) return;
+
+            btn.disabled = true;
+            answerText.innerText = "Searching...";
+            resultBox.style.display = 'block';
+
+            try {
+                const res = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, k: 3 })
+                });
+                const data = await res.json();
+                answerText.innerText = data.answer;
+            } catch (e) {
+                alert("Query failed");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

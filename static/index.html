@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Document Tools</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #eee;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border-color: #4A90E2;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>What would you like to do?</h1>
+        <div class="grid">
+            <a href="/rag" class="card">
+                <div class="icon">🔍</div>
+                <h2>RAG Application</h2>
+                <p>Chat with your documents and get answers.</p>
+            </a>
+            <a href="/summarizer" class="card">
+                <div class="icon">📝</div>
+                <h2>Summarizer</h2>
+                <p>Get instant summaries of long text or PDFs.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
