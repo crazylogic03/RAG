@@ -39,28 +39,18 @@ vector_store = None
 query_cache: dict = {}
 
 
-# -------- startup: load existing index --------
-@app.on_event("startup")
-async def startup_event():
-    global vector_store
-    if FAISS_PATH.exists():
-        print("Loading existing FAISS index...")
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-        vector_store = FAISS.load_local(
-            "faiss_index",
-            embeddings,
-            allow_dangerous_deserialization=True,
-        )
-        print("FAISS index loaded successfully.")
-    else:
-        print("No existing FAISS index found. Starting with empty store.")
+# -------- REMOVED STARTUP BLOCK --------
 
 
 # =====================================================================
 #  HELPERS
 # =====================================================================
+
+def get_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
+
 
 def load_document(file_path: str):
     """Load a PDF or TXT file and return LangChain Documents."""
@@ -81,9 +71,7 @@ def build_vector_store(documents):
     )
     chunks = splitter.split_documents(documents)
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embeddings = get_embeddings()
 
     store = FAISS.from_documents(chunks, embeddings)
     store.save_local("faiss_index")
@@ -243,8 +231,6 @@ async def upload_document(file: UploadFile = File(...)):
     }
 
 
-# -------------------- Query --------------------
-
 @app.post("/query")
 async def query_document(req: QueryRequest):
     if vector_store is None:
@@ -280,15 +266,11 @@ async def query_document(req: QueryRequest):
     return response
 
 
-# -------------------- Documents --------------------
-
 @app.get("/documents")
 async def list_documents():
     files = sorted([f.name for f in UPLOAD_DIR.iterdir() if f.is_file()])
     return {"documents": files}
 
-
-# -------------------- Summarize (NEW) --------------------
 
 @app.post("/summarize")
 async def summarize_text(req: SummarizeRequest):
